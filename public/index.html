@@ -5,11 +5,82 @@
 		<script src="https://apis.google.com/js/client:platform.js?onload=renderButton" async defer></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.0/TweenMax.min.js"></script>
 		<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
-		<link rel="stylesheet" type="text/css" href="css/main.css">
+		<link rel="stylesheet" type="text/css" href="css/login.css">
+	 <script>
+      // cargamos el sdk de forma asincrónica
+      (function(d){
+         var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement('script'); js.id = id; js.async = true;
+         js.src = "//connect.facebook.net/en_US/all.js";
+         ref.parentNode.insertBefore(js, ref);
+       }(document));
+ 
+      // Iniciamos el sdk y su configuración
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId      : '1597812100526722',// la appid de tu aplicación facebook
+          status	 : true,
+		  cookie	 : true,
+		  xfbml		 : true,
+		  oauth 	 : true // habilita oauth 2.0
+        });
+ 
+         //manejador para comprobar si el status del usuario ha cambiado o no 
+        FB.Event.subscribe('auth.statusChange', function(response) {
+	        if (response.authResponse) {
+	          //si el usuario es logueado correctamente hacemos lo que queramos
+	          //en nuestro caso redirigimos
+	          FB.api('/me', function(me){
+		          if (me.name) {
+		          	 //en vez de redirigir, como la petición es realizada
+		          	 //sin refrescar, podemos hacer cualquier interacción
+		          	 //sin movernos de la página
+		             window.location = "home.html";
+		          }
+	          })
+	        } 
+        });
+ 
+        //evento para iniciar sesión y pedir los permisos que pasemos en scope
+        document.getElementById('fb').addEventListener('click', function(){
+         FB.login(function(){}, {  });
+        });
+      } 
+    </script>
+    <script>
+    	function onSuccess(googleUser) {
+
+            window.location = "homeGmail.html"
+        //     });
+        // });
+    }
+    function onFailure(error) {
+        alert(error);
+    }
+    function renderButton() {
+        gapi.signin2.render('gm', {
+            'scope': 'profile email',
+            'width': 250,
+            'height': 30,
+            'longtitle': true,
+            'theme': 'light',
+            'onsuccess': onSuccess,
+            'onfailure': onFailure
+        });
+    }
+    function signOut() {
+        var auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(function () {
+            $('.userContent').html('');
+            $('#gm').slideDown('slow');
+        });
+    }
+
+    </script>
 	</head>
 	<body>
 	<section>
-		
 			<div class="fondo">
 			<div class="opacity">
 				<div id="login-button">
@@ -26,11 +97,8 @@
 				    <input type="email" name="email" placeholder="E-mail">
 				    <input type="password" name="pass" placeholder="Password">
 				    <a class="login" href="#">Log in</a>
-				    <a class="facebook"  href="#">
-				    	 <fb:login-button 
-								onlogin="window.location = 'inicio.html'" >facebook</fb:login-button>
-				    </a>
-				    <a class="gmail" href="#">Gmail</a>
+				    <a class="facebook" id="fb" href="#">Facebook</a>
+				    <a class="gmail" id="gm" href="#">Gmail</a>
 	
 				    <div id="remember-container">
 				      <input type="checkbox" id="checkbox-2-1" class="checkbox" checked="checked"/>
